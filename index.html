@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <meta name="color-scheme" content="light dark"/>
     <link rel="stylesheet" href="css/pico.min.css"/>
     <link rel="stylesheet" href="css/pico.colors.min.css"/>
@@ -12,30 +13,30 @@
 <body>
 <main class="container">
     <h1>Property Search</h1>
-    <form>
+    <form id="searchForm">
         <fieldset>
             Price, €/mo
             <div class="grid">
-                <input id="min_price" name="min_price" type="number" placeholder="Min" autocomplete="min_price"/>
-                <input id="max_price" name="max_price" type="number" placeholder="Max" autocomplete="max_price"/>
+                <input name="min_price" type="number" placeholder="Min" autocomplete="min_price"/>
+                <input name="max_price" type="number" placeholder="Max" autocomplete="max_price"/>
             </div>
 
             Size, m²
             <div class="grid">
-                <input id="min_size" name="min_size" type="number" placeholder="Min" autocomplete="min_size"/>
-                <input id="max_size" name="max_size" type="number" placeholder="Max" autocomplete="max_size"/>
+                <input name="min_size" type="number" placeholder="Min" autocomplete="min_size"/>
+                <input name="max_size" type="number" placeholder="Max" autocomplete="max_size"/>
             </div>
 
             Rooms
             <div class="grid">
-                <input id="min_rooms" name="min_rooms" type="number" placeholder="Min" autocomplete="min_rooms"/>
-                <input id="max_rooms" name="max_rooms" type="number" placeholder="Max" autocomplete="max_rooms"/>
+                <input name="min_rooms" type="number" placeholder="Min" autocomplete="min_rooms"/>
+                <input name="max_rooms" type="number" placeholder="Max" autocomplete="max_rooms"/>
             </div>
 
             Year of construction
             <div class="grid">
-                <input id="min_year" name="min_year" type="number" placeholder="Min" autocomplete="min_year"/>
-                <input id="max_year" name="max_year" type="number" placeholder="Max" autocomplete="max_year"/>
+                <input name="min_year" type="number" placeholder="Min" autocomplete="min_year"/>
+                <input name="max_year" type="number" placeholder="Max" autocomplete="max_year"/>
             </div>
 
             <label for="energy_label">Worst energy label</label>
@@ -58,29 +59,30 @@
             <label>Location</label>
             <label>
                 Radius: <span id="radius_text">1000</span> m
-                <input type="range" id="radius" name="radius" min="100" max="5000" step="100" value="1000"
+                <input type="range" name="radius" min="100" max="5000" step="100" value="1000"
                        onchange="updateRange(this.value)">
             </label>
             <div id="map"></div>
             <div class="grid">
-                <input type="button" id="confirm_position" value="Confirm position" class="accent"
+                <input type="button" value="Confirm position" class="accent"
                        onclick="confirmPosition()"/>
-                <input type="button" id="clear_position" value="Clear position" onclick="clearPosition()"/>
+                <input type="button" value="Clear position" onclick="clearPosition()"/>
             </div>
             <div id="locationView" class="grid hidden">
                 <label>Latitude
-                    <input type="text" id="latitude" placeholder="Latitude" disabled>
+                    <input type="text" id="latitude" name="latitude" placeholder="Latitude" disabled>
                 </label>
                 <label>Longitude
-                    <input type="text" id="longitude" placeholder="Longitude" disabled>
+                    <input type="text" id="longitude" name="longitude" placeholder="Longitude" disabled>
                 </label>
             </div>
 
         </fieldset>
-        <input type="submit" value="Save"/>
+        <input type="button" value="Done" onclick="submitForm(this)"/>
     </form>
 </main>
 
+<!-- Load the Google Maps JavaScript API -->
 <script>
     (g => {
         var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__",
@@ -106,6 +108,8 @@
         // Add other bootstrap parameters as needed, using camel case.
     });
 </script>
+<!-- Load the Telegram Web App JS SDK -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <script>
     let map, pin, circle;
@@ -163,7 +167,21 @@
         document.getElementById("locationView").classList.add("hidden");
     }
 
+    // send all form fields as JSON to the Telegram app
+    function submitForm() {
+        let data = {};
+        let form = document.getElementById("searchForm");
+        for (let i = 0; i < form.length; i++) {
+            if (form.elements[i].name) {
+                data[form.elements[i].name] = form.elements[i].value;
+            }
+        }
+        console.log(data);
+        Telegram.WebApp.sendData(JSON.stringify(data));
+    }
+
     initMap();
+    Telegram.WebApp.ready();
 </script>
 
 </body>
