@@ -63,11 +63,6 @@
                        onchange="updateRange(this.value)">
             </label>
             <div id="map"></div>
-            <div class="grid">
-                <input type="button" value="Confirm position" class="accent"
-                       onclick="confirmPosition()"/>
-                <input type="button" value="Clear position" onclick="clearPosition()"/>
-            </div>
             <div id="locationView" class="grid hidden">
                 <label>Latitude
                     <input type="text" id="latitude" name="latitude" placeholder="Latitude" disabled>
@@ -78,7 +73,6 @@
             </div>
 
         </fieldset>
-        <input type="button" value="Done" onclick="submitForm(this)"/>
     </form>
 </main>
 
@@ -114,12 +108,16 @@
 <script>
     let map, pin, circle;
     let radiusText = document.getElementById("radius_text");
+    let amsterdam = {lat: 52.37281, lng: 4.89370};
+    let latitude = document.getElementById("latitude");
+    let longitude = document.getElementById("longitude");
+    latitude.value = amsterdam.lat;
+    longitude.value = amsterdam.lng;
 
     async function initMap() {
         const {Map} = await google.maps.importLibrary("maps");
         const {AdvancedMarkerElement} = await google.maps.importLibrary("marker");
 
-        let amsterdam = {lat: 52.37281, lng: 4.89370};
         map = new Map(document.getElementById("map"), {
             center: amsterdam,
             zoom: 14,
@@ -147,24 +145,14 @@
         map.addListener("center_changed", () => {
             pin.position = map.center;
             circle.setCenter(map.center);
+            latitude.value = map.center.lat();
+            longitude.value = map.center.lng();
         });
     }
 
     function updateRange(value) {
         circle.setRadius(parseInt(value));
         radiusText.innerHTML = value;
-    }
-
-    function confirmPosition() {
-        document.getElementById("latitude").value = pin.position.lat + "°";
-        document.getElementById("longitude").value = pin.position.lng + "°";
-        document.getElementById("locationView").classList.remove("hidden");
-    }
-
-    function clearPosition() {
-        document.getElementById("latitude").value = "";
-        document.getElementById("longitude").value = "";
-        document.getElementById("locationView").classList.add("hidden");
     }
 
     // send all form fields as JSON to the Telegram app
@@ -176,12 +164,23 @@
                 data[form.elements[i].name] = form.elements[i].value;
             }
         }
-        console.log(data);
-        Telegram.WebApp.sendData(JSON.stringify(data));
+        let json = JSON.stringify(data);
+        Telegram.WebApp.showAlert("Sending data to the app: " + json);
+        Telegram.WebApp.sendData(json);
     }
 
     initMap();
     Telegram.WebApp.ready();
+
+    // Show main button
+    Telegram.WebApp.MainButton.setParams({
+        text: 'Done',
+    });
+    Telegram.WebApp.MainButton.onClick(() => {
+        submitForm();
+    });
+    Telegram.WebApp.MainButton.show();
+
 </script>
 
 </body>
