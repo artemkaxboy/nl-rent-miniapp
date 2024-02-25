@@ -59,8 +59,8 @@
             <label>Location</label>
             <label>
                 Radius: <span id="radius_text">1000</span> m
-                <input type="range" name="radius" min="100" max="5000" step="100" value="1000"
-                       onchange="updateRange(this.value)">
+                <input type="range" name="radius" min="100" max="5000" value="1000"
+                       onchange="updateRange(this.value)" oninput="updateRange(this.value)">
             </label>
             <div id="map"></div>
             <div id="locationView" class="grid hidden">
@@ -71,6 +71,8 @@
                     <input type="text" id="longitude" name="longitude" placeholder="Longitude" disabled>
                 </label>
             </div>
+
+            <button type="button" id="submitButton" onclick="submitForm()" class="hidden">Done</button>
 
         </fieldset>
     </form>
@@ -96,7 +98,7 @@
             }));
         d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n))
     })({
-        key: "AIzaSyDet83PtDogCpB4PSoZhuHYlEF7JXW38dw",
+        key: "AIzaSyAJnyc2jeVRCXuBXvYkgELg2EAsvXTj9Nw",
         v: "weekly",
         // Use the 'v' parameter to indicate the version to use (weekly, beta, alpha, etc.).
         // Add other bootstrap parameters as needed, using camel case.
@@ -106,6 +108,7 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <script>
+    let isTelegram = false;
     let map, pin, circle;
     let radiusText = document.getElementById("radius_text");
     let amsterdam = {lat: 52.37281, lng: 4.89370};
@@ -165,21 +168,31 @@
             }
         }
         let json = JSON.stringify(data);
-        Telegram.WebApp.showAlert("Sending data to the app: " + json);
-        Telegram.WebApp.sendData(json);
+        if (isTelegram) {
+            Telegram.WebApp.showAlert("Sending data to the app: " + json);
+            Telegram.WebApp.sendData(json);
+        } else {
+            alert("Sending data to the app: " + json);
+        }
     }
 
     initMap();
     Telegram.WebApp.ready();
+    isTelegram = Telegram.WebApp.platform !== "unknown";
 
-    // Show main button
-    Telegram.WebApp.MainButton.setParams({
-        text: 'Done',
-    });
-    Telegram.WebApp.MainButton.onClick(() => {
-        submitForm();
-    });
-    Telegram.WebApp.MainButton.show();
+    if (isTelegram) {
+        // Show main button
+        Telegram.WebApp.MainButton.setParams({
+            text: 'Done',
+        });
+        Telegram.WebApp.MainButton.onClick(() => {
+            submitForm();
+        });
+        Telegram.WebApp.MainButton.show();
+    } else {
+        // Show submit button
+        document.getElementById("submitButton").classList.remove("hidden");
+    }
 
 </script>
 
