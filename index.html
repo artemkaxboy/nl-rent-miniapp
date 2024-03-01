@@ -13,34 +13,50 @@
 <body>
 <main class="container">
     <h1>Property Search</h1>
-    <form id="searchForm">
+    <form id="searchForm" onsubmit="submitForm()">
         <fieldset>
             Price, €/mo
             <div class="grid">
-                <input name="min_price" type="number" placeholder="Min" autocomplete="min_price"/>
-                <input name="max_price" type="number" placeholder="Max" autocomplete="max_price"/>
+                <div class="input-wrapper">
+                    <input id="minPrice" name="minPrice" type="number" placeholder="Min" autocomplete="minPrice"/>
+                </div>
+                <div class="input-wrapper">
+                    <input id="maxPrice" name="maxPrice" type="number" placeholder="Max" autocomplete="maxPrice"/>
+                </div>
             </div>
 
             Size, m²
             <div class="grid">
-                <input name="min_size" type="number" placeholder="Min" autocomplete="min_size"/>
-                <input name="max_size" type="number" placeholder="Max" autocomplete="max_size"/>
+                <div class="input-wrapper">
+                    <input id="minSize" name="minSize" type="number" placeholder="Min" autocomplete="minSize"/>
+                </div>
+                <div class="input-wrapper">
+                    <input id="maxSize" name="maxSize" type="number" placeholder="Max" autocomplete="maxSize"/>
+                </div>
             </div>
 
             Rooms
             <div class="grid">
-                <input name="min_rooms" type="number" placeholder="Min" autocomplete="min_rooms"/>
-                <input name="max_rooms" type="number" placeholder="Max" autocomplete="max_rooms"/>
+                <div class="input-wrapper">
+                    <input id="minRooms" name="minRooms" type="number" placeholder="Min" autocomplete="minRooms"/>
+                </div>
+                <div class="input-wrapper">
+                    <input id="maxRooms" name="maxRooms" type="number" placeholder="Max" autocomplete="maxRooms"/>
+                </div>
             </div>
 
             Year of construction
             <div class="grid">
-                <input name="min_year" type="number" placeholder="Min" autocomplete="min_year"/>
-                <input name="max_year" type="number" placeholder="Max" autocomplete="max_year"/>
+                <div class="input-wrapper">
+                    <input id="minYear" name="minYear" type="number" placeholder="Min" autocomplete="minYear"/>
+                </div>
+                <div class="input-wrapper">
+                    <input id="maxYear" name="maxYear" type="number" placeholder="Max" autocomplete="maxYear"/>
+                </div>
             </div>
 
-            <label for="energy_label">Worst energy label</label>
-            <select id="energy_label" name="energy_label" autocomplete="energy_label">
+            <label for="energyLabel">Worst energy label</label>
+            <select id="energyLabel" name="energyLabel">
                 <option value="">Any</option>
                 <option value="A+++++">A+++++</option>
                 <option value="A++++">A++++</option>
@@ -56,23 +72,17 @@
                 <option value="G">G</option>
             </select>
 
-            <label>Location</label>
-            <label>
-                Radius: <span id="radius_text">1000</span> m
-                <input type="range" name="radius" min="100" max="5000" value="1000"
-                       onchange="updateRange(this.value)" oninput="updateRange(this.value)">
-            </label>
+            Location
+            <label for="radius">Radius: <span id="radiusText">1000</span> m</label>
+            <input id="radius" type="range" name="radius" min="100" max="5000" value="1000"
+                   onchange="updateRadius(this.value)" oninput="updateRadius(this.value)">
             <div id="map"></div>
             <div id="locationView" class="grid hidden">
-                <label>Latitude
-                    <input type="text" id="latitude" name="latitude" placeholder="Latitude" disabled>
-                </label>
-                <label>Longitude
-                    <input type="text" id="longitude" name="longitude" placeholder="Longitude" disabled>
-                </label>
+                <input type="hidden" id="latitude" name="latitude">
+                <input type="hidden" id="longitude" name="longitude">
             </div>
 
-            <button type="button" id="submitButton" onclick="submitForm()" class="hidden">Done</button>
+            <input type="submit" value="Done">
 
         </fieldset>
     </form>
@@ -106,14 +116,17 @@
 </script>
 <!-- Load the Telegram Web App JS SDK -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<!-- Load the Just-validate library -->
+<script src="https://unpkg.com/just-validate@latest/dist/just-validate.production.min.js"></script>
 
 <script>
-    let isTelegram = false;
     let map, pin, circle;
-    let radiusText = document.getElementById("radius_text");
-    let amsterdam = {lat: 52.37281, lng: 4.89370};
-    let latitude = document.getElementById("latitude");
-    let longitude = document.getElementById("longitude");
+    let isTelegram = false;
+    const amsterdam = {lat: 52.37281, lng: 4.89370};
+    const radiusText = document.getElementById("radiusText");
+    const latitude = document.getElementById("latitude");
+    const longitude = document.getElementById("longitude");
+    const form = document.getElementById("searchForm");
     latitude.value = amsterdam.lat;
     longitude.value = amsterdam.lng;
 
@@ -153,26 +166,25 @@
         });
     }
 
-    function updateRange(value) {
+    function updateRadius(value) {
         circle.setRadius(parseInt(value));
         radiusText.innerHTML = value;
     }
 
     // send all form fields as JSON to the Telegram app
     function submitForm() {
-        let data = {};
-        let form = document.getElementById("searchForm");
-        for (let i = 0; i < form.length; i++) {
-            if (form.elements[i].name) {
-                data[form.elements[i].name] = form.elements[i].value;
+        if (validator.isValid) {
+            let data = {};
+            for (let i = 0; i < form.length; i++) {
+                if (form.elements[i].name) {
+                    data[form.elements[i].name] = form.elements[i].value;
+                }
             }
-        }
-        let json = JSON.stringify(data);
-        if (isTelegram) {
-            Telegram.WebApp.showAlert("Sending data to the app: " + json);
-            Telegram.WebApp.sendData(json);
-        } else {
+            let json = JSON.stringify(data);
             alert("Sending data to the app: " + json);
+            if (isTelegram) {
+                Telegram.WebApp.sendData(json);
+            }
         }
     }
 
@@ -180,20 +192,165 @@
     Telegram.WebApp.ready();
     isTelegram = Telegram.WebApp.platform !== "unknown";
 
-    if (isTelegram) {
-        // Show main button
-        Telegram.WebApp.MainButton.setParams({
-            text: 'Done',
-        });
-        Telegram.WebApp.MainButton.onClick(() => {
-            submitForm();
-        });
-        Telegram.WebApp.MainButton.show();
-    } else {
-        // Show submit button
-        document.getElementById("submitButton").classList.remove("hidden");
-    }
+    const validator = new JustValidate('#searchForm');
+    let revalidation = false;
+    validator
+        .addField('#minPrice', [
+            {rule: 'integer'},
+            {rule: 'minNumber', value: 0},
+            {
+                validator: (value, fields) => {
+                    const boundFieldId = '#maxPrice'
+                    if (validator.isSubmitted && !revalidation) {
+                        revalidation = true;
+                        validator.revalidateField(boundFieldId).then(() => {
+                        });
+                        revalidation = false;
+                    }
 
+                    const maxPrice = fields[boundFieldId].elem.value;
+                    return maxPrice === '' || value === '' || parseInt(value) <= parseInt(maxPrice);
+                },
+                errorMessage: 'Must be less than max price'
+            }
+        ])
+        .addField('#maxPrice', [
+            {rule: 'integer'},
+            {rule: 'minNumber', value: 0},
+            {rule: 'maxNumber', value: 100000},
+            {
+                validator: (value, fields) => {
+                    const boundFieldId = '#minPrice';
+                    if (validator.isSubmitted && !revalidation) {
+                        revalidation = true;
+                        validator.revalidateField(boundFieldId).then(() => {
+                        });
+                        revalidation = false;
+                    }
+
+                    const minPrice = fields[boundFieldId].elem.value;
+                    return minPrice === '' || value === '' || parseInt(value) >= parseInt(minPrice);
+                },
+                errorMessage: 'Must be greater than min price'
+            }
+        ])
+        .addField('#minSize', [
+            {rule: 'integer'},
+            {rule: 'minNumber', value: 0},
+            {
+                validator: (value, fields) => {
+                    const boundFieldId = '#maxSize'
+                    if (validator.isSubmitted && !revalidation) {
+                        revalidation = true;
+                        validator.revalidateField(boundFieldId).then(() => {
+                        });
+                        revalidation = false;
+                    }
+
+                    const maxSize = fields[boundFieldId].elem.value;
+                    return maxSize === '' || value === '' || parseInt(value) <= parseInt(maxSize);
+                },
+                errorMessage: 'Must be less than max size'
+            }
+        ])
+        .addField('#maxSize', [
+            {rule: 'integer'},
+            {rule: 'minNumber', value: 0},
+            {rule: 'maxNumber', value: 1000},
+            {
+                validator: (value, fields) => {
+                    const boundFieldId = '#minSize';
+                    if (validator.isSubmitted && !revalidation) {
+                        revalidation = true;
+                        validator.revalidateField(boundFieldId).then(() => {
+                        });
+                        revalidation = false;
+                    }
+
+                    const minSize = fields[boundFieldId].elem.value;
+                    return minSize === '' || value === '' || parseInt(value) >= parseInt(minSize);
+                },
+                errorMessage: 'Must be greater than min size'
+            }
+        ])
+        .addField('#minRooms', [
+            {rule: 'integer'},
+            {rule: 'minNumber', value: 0},
+            {
+                validator: (value, fields) => {
+                    const boundFieldId = '#maxRooms'
+                    if (validator.isSubmitted && !revalidation) {
+                        revalidation = true;
+                        validator.revalidateField(boundFieldId).then(() => {
+                        });
+                        revalidation = false;
+                    }
+
+                    const maxRooms = fields[boundFieldId].elem.value;
+                    return maxRooms === '' || value === '' || parseInt(value) <= parseInt(maxRooms);
+                },
+                errorMessage: 'Must be less than max rooms'
+            }
+        ])
+        .addField('#maxRooms', [
+            {rule: 'integer'},
+            {rule: 'minNumber', value: 0},
+            {rule: 'maxNumber', value: 10},
+            {
+                validator: (value, fields) => {
+                    const boundFieldId = '#minRooms';
+                    if (validator.isSubmitted && !revalidation) {
+                        revalidation = true;
+                        validator.revalidateField(boundFieldId).then(() => {
+                        });
+                        revalidation = false;
+                    }
+
+                    const minRooms = fields[boundFieldId].elem.value;
+                    return minRooms === '' || value === '' || parseInt(value) >= parseInt(minRooms);
+                },
+                errorMessage: 'Must be greater than min rooms'
+            }
+        ])
+        .addField('#minYear', [
+            {rule: 'integer'},
+            {rule: 'minNumber', value: 1800},
+            {
+                validator: (value, fields) => {
+                    const boundFieldId = '#maxYear'
+                    if (validator.isSubmitted && !revalidation) {
+                        revalidation = true;
+                        validator.revalidateField(boundFieldId).then(() => {
+                        });
+                        revalidation = false;
+                    }
+
+                    const maxYear = fields[boundFieldId].elem.value;
+                    return maxYear === '' || value === '' || parseInt(value) <= parseInt(maxYear);
+                },
+                errorMessage: 'Must be less than max year'
+            }
+        ])
+        .addField('#maxYear', [
+            {rule: 'integer'},
+            {rule: 'minNumber', value: 1800},
+            {rule: 'maxNumber', value: new Date().getFullYear()},
+            {
+                validator: (value, fields) => {
+                    const boundFieldId = '#minYear';
+                    if (validator.isSubmitted && !revalidation) {
+                        revalidation = true;
+                        validator.revalidateField(boundFieldId).then(() => {
+                        });
+                        revalidation = false;
+                    }
+
+                    const minYear = fields[boundFieldId].elem.value;
+                    return minYear === '' || value === '' || parseInt(value) >= parseInt(minYear);
+                },
+                errorMessage: 'Must be greater than min year'
+            }
+        ])
 </script>
 
 </body>

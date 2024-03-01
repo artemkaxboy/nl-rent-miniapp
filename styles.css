@@ -12,3 +12,12 @@
     background: var(--pico-color-pink-500);
     border-color: var(--pico-color-pink-500);
 }
+
+.just-validate-error-field {
+    border-color: var(--pico-color-pink-500);
+}
+
+.just-validate-error-label {
+    position: relative;
+    top: calc(-1 * var(--pico-spacing));
+}
