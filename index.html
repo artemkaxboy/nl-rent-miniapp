@@ -172,9 +172,11 @@
                 }
             }
             let json = JSON.stringify(data);
-            alert("Sending data to the app: " + json);
             if (isTelegram) {
+                alert("Sending data to the app: " + json);
                 Telegram.WebApp.sendData(json);
+            } else {
+                alert("Data: " + json);
             }
         }
     }
@@ -217,6 +219,9 @@
     // init Telegram
     Telegram.WebApp.ready();
     isTelegram = Telegram.WebApp.platform !== "unknown";
+    if (!isTelegram) {
+        alert("Telegram Web App is not available");
+    }
     // init Telegram
 
     validator
