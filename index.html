@@ -130,6 +130,9 @@
     latitude.value = amsterdam.lat;
     longitude.value = amsterdam.lng;
 
+    let url = new URL(location.href);
+    let debug = url.searchParams.get('debug') === 'true';
+
     async function initMap() {
         const {Map} = await google.maps.importLibrary("maps");
         const {AdvancedMarkerElement} = await google.maps.importLibrary("marker");
@@ -137,7 +140,7 @@
         map = new Map(document.getElementById("map"), {
             center: amsterdam,
             zoom: 14,
-            mapId: "9ca8c43502ecd2ce",
+            mapId: "f20a7fa4750b4adb",
         });
 
         pin = new AdvancedMarkerElement({
@@ -188,7 +191,11 @@
         }
     }
 
-    initMap();
+    if (debug) {
+        document.getElementById("map").classList.add("hidden");
+    } else {
+        initMap();
+    }
     Telegram.WebApp.ready();
     isTelegram = Telegram.WebApp.platform !== "unknown";
 
