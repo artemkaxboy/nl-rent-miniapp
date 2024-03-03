@@ -175,6 +175,7 @@
             if (isTelegram) {
                 alert("Sending data to the app: " + json);
                 Telegram.WebApp.sendData(json);
+                alert("Data sent");
             } else {
                 alert("Data: " + json);
             }
