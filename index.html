@@ -77,11 +77,9 @@
             <input id="radius" type="range" name="radius" min="100" max="5000" value="1000"
                    onchange="updateRadius(this.value)" oninput="updateRadius(this.value)">
             <div id="map"></div>
-            <div id="locationView" class="grid hidden">
-                <input type="hidden" id="latitude" name="latitude" value="52.37281">
-                <input type="hidden" id="longitude" name="longitude" value="4.89370">
-            </div>
 
+            <input type="hidden" id="latitude" name="latitude" value="52.37281">
+            <input type="hidden" id="longitude" name="longitude" value="4.89370">
             <input type="submit" value="Done">
 
         </fieldset>
@@ -157,6 +155,10 @@
         });
     }
 
+    function hideMap() {
+        document.getElementById("map").classList.add("hidden");
+    }
+
     function updateRadius(value) {
         circle.setRadius(parseInt(value));
         radiusTextElem.innerHTML = value;
@@ -173,11 +175,12 @@
             }
             let json = JSON.stringify(data);
             if (isTelegram) {
-                alert("Sending data to the app: " + json);
+                if (debug) {
+                    alert("Sending data to the app: " + json);
+                }
                 Telegram.WebApp.sendData(json);
-                alert("Data sent");
             } else {
-                alert("Data: " + json);
+                alert("No send data: " + json);
             }
         }
     }
@@ -209,14 +212,6 @@
     }
     // setup initial values
 
-    // init map
-    if (debug) {
-        document.getElementById("map").classList.add("hidden");
-    } else {
-        initMap();
-    }
-    // init map
-
     // init Telegram
     Telegram.WebApp.ready();
     isTelegram = Telegram.WebApp.platform !== "unknown";
@@ -224,6 +219,14 @@
         alert("Telegram Web App is not available");
     }
     // init Telegram
+
+    // init map
+    if (debug || !isTelegram) {
+        hideMap();
+    } else {
+        initMap();
+    }
+    // init map
 
     validator
         .addField('#minPrice', [
