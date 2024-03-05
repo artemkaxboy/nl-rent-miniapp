@@ -184,7 +184,11 @@
         let data = {};
         for (let i = 0; i < formElem.length; i++) {
             if (formElem.elements[i].name) {
-                data[formElem.elements[i].name] = formElem.elements[i].value;
+                if (formElem.elements[i].type === "checkbox") {
+                    data[formElem.elements[i].name] = formElem.elements[i].checked;
+                } else {
+                    data[formElem.elements[i].name] = formElem.elements[i].value;
+                }
             }
         }
         let json = JSON.stringify(data);
@@ -220,7 +224,11 @@
         for (let key in data) {
             const elem = document.getElementById(key);
             if (elem) {
-                elem.value = data[key];
+                if (elem.type === "checkbox") {
+                    elem.checked = data[key];
+                } else {
+                    elem.value = data[key];
+                }
             }
         }
     }
@@ -230,7 +238,7 @@
     Telegram.WebApp.ready();
     isTelegram = Telegram.WebApp.platform !== "unknown";
     if (!isTelegram) {
-        // setTimeout(() => alert("Telegram Web App is not available"), 1);
+        setTimeout(() => alert("Telegram Web App is not available"), 1);
     }
     // init Telegram
 
