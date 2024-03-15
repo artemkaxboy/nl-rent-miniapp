@@ -269,6 +269,7 @@
                 errorMessage: 'Min price must be less than max price'
             },
             {rule: 'minNumber', value: 0, errorMessage: 'Min price must be greater than 0'},
+            {rule: 'maxNumber', value: 100000, errorMessage: 'Min price must be less than 100000'},
         ], {errorsContainer: '#error-price'})
         .addField('#maxPrice', [
             {rule: 'integer', errorMessage: 'Max price must be an integer'},
@@ -308,6 +309,7 @@
                 errorMessage: 'Min size must be less than max size'
             },
             {rule: 'minNumber', value: 0, errorMessage: 'Min size must be greater than 0'},
+            {rule: 'maxNumber', value: 1000, errorMessage: 'Min size must be less than 1000'}
         ], {errorsContainer: '#error-size'})
         .addField('#maxSize', [
             {rule: 'integer', errorMessage: 'Max size must be an integer'},
@@ -387,6 +389,11 @@
                 errorMessage: 'Min year must be less than max year'
             },
             {rule: 'minNumber', value: 1800, errorMessage: 'Min year must be greater than 1800'},
+            {
+                rule: 'maxNumber',
+                value: new Date().getFullYear(),
+                errorMessage: 'Min year must be less than current year'
+            },
         ], {errorsContainer: '#error-year'})
         .addField('#maxYear', [
             {rule: 'integer', errorMessage: 'Max year must be an integer'},
